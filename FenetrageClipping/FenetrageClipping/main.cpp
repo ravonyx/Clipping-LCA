@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <list>
 #include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iterator>
+#include <glm\glm.hpp>
 
 GLint referenceX = 0; //Declar reference points used to drag 
 GLint referenceY = 0; // the rectangle 
@@ -28,6 +32,7 @@ int right = FALSE;
 
 bool finish_window = FALSE;
 bool finish_poly = FALSE;
+bool finish_fenetrage = FALSE;
 
 struct Point
 {
@@ -36,6 +41,7 @@ struct Point
 };
 std::vector< Point > points_window;
 std::vector< Point > points_poly;
+std::vector< Point > points_solution;
 
 void Initialize()
 {
@@ -56,15 +62,10 @@ void mouse(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
-		printf("%d %d", finish_window, finish_poly);
 		if (!finish_window)
 			points_window.push_back(Point(x, y));
 		if (!finish_poly && finish_window)
-		{
 			points_poly.push_back(Point(x, y));
-			printf("Draw poly");
-		}
-			
 	}
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 	{
@@ -128,6 +129,74 @@ void drawPoints(std::vector< Point > points)
 	glEnd();
 }
 
+
+bool isVisble(Point point)
+{
+	double minX = points_window[0].x;
+	double maxX = points_window[0].x;
+	double minY = points_window[0].y;
+	double maxY = points_window[0].y;
+	for (size_t i = 1; i < points_window.size(); i++)
+	{
+		Point q = points_window[i];
+		minX = min(q.x, minX);
+		maxX = max(q.x, maxX);
+		minY = min(q.y, minY);
+		maxY = max(q.y, maxY);
+	}
+
+	//Check the extreme border
+	if (point.x < minX || point.x > maxX || point.y < minY || point.y > maxY)
+	{
+		return false;
+	}
+
+	bool inside = false;
+	for (size_t i = 0, j = points_window.size() - 1; i < points_window.size(); j = i++)
+	{
+		if ((points_window[i].y > point.y) != (points_window[j].y > point.y) && point.x < (points_window[j].x - points_window[i].x) * (point.y - points_window[i].y) / (points_window[j].y - points_window[i].y) + points_window[i].x)
+		{
+			inside = !inside;
+		}
+	}
+
+	return inside;
+}
+
+glm::vec2 cut(glm::vec2 line1, glm::vec2 line2)
+{
+	glm::vec2 v3;
+	std::set_intersection(line1.r, line1.s, line2.r, line2.s, std::back_inserter(v3));
+	return v3;
+}
+
+void Fenetrage()
+{
+	for (size_t i = 0; i < points_window.size(); i++)
+	{
+		for (size_t i = 0; i < points_poly.size(); i++)
+		{
+			if (isVisble(points_poly[i]))
+				points_solution.push_back(points_poly[i]);
+			else
+			{
+				Point a = points_poly[i - 1];
+				Point b = points_poly[i];
+				glm::vec2 linePoly = { b.x - a.x, b.y - a.y };
+
+				Point a_window = points_window[i - 1];
+				Point b_window = points_window[i];
+				glm::vec2 lineWindow = { b_window.x - a_window.x, b_window.y - a_window.y };
+
+				glm::vec2 point = cut(linePoly, lineWindow);
+				printf("%d %d", point.r, point.s);
+			}
+		}
+	}
+
+	finish_fenetrage = TRUE;
+}
+
 void display(void)
 {
 	glClearColor(0, 0, 0, 1);
@@ -152,6 +221,16 @@ void display(void)
 	if (finish_poly)
 		drawLines(points_poly);
 
+	if (finish_poly)
+		Fenetrage();
+
+	if (finish_fenetrage)
+	{
+		points_poly.clear();
+		drawPoints(points_solution);
+		drawLines(points_solution);
+	}
+	
 	glutSwapBuffers();
 
 }
