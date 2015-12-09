@@ -89,7 +89,7 @@ void keyboard(unsigned char key, int x, int y)
 	glutPostRedisplay();
 }
 
-void drawLines(std::vector< Point > points)
+void drawLines(std::vector<Point> points)
 {
 	for (size_t i = 0; i < points.size(); ++i)
 	{
@@ -175,10 +175,10 @@ void Fenetrage()
 {
 	for (size_t i = 0; i < points_window.size(); i++)
 	{
-		for (size_t i = 0; i < points_poly.size(); i++)
+		for (size_t i = 1; i < points_poly.size(); i++)
 		{
-			if (isVisble(points_poly[i]))
-				points_solution.push_back(points_poly[i]);
+			if (isVisble(points_poly[i-1]))
+				points_solution.push_back(points_poly[i-1]);
 			else
 			{
 				Point a = points_poly[i - 1];
@@ -223,7 +223,7 @@ void display(void)
 		drawLines(points_poly);
 
 	if (finish_poly)
-		Fenetrage();
+		//Fenetrage();
 
 	if (finish_fenetrage)
 	{
