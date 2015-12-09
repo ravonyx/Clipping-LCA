@@ -133,6 +133,7 @@ void drawPoints(std::vector< Point > points)
 
 bool isVisble(Point point)
 {
+
 	float minX = points_window[0].x;
 	float maxX = points_window[0].x;
 	float minY = points_window[0].y;
@@ -167,7 +168,6 @@ bool isVisble(Point point)
 glm::vec2 cut(glm::vec2 line1, glm::vec2 line2)
 {
 	glm::vec2 v3;
-	
 	return v3;
 }
 
