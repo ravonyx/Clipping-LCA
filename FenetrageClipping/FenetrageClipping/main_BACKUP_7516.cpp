@@ -7,7 +7,7 @@
 
 #include <GL\freeglut.h>
 #include <glm\glm.hpp>
-#include <glm\gtx\string_cast.hpp>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <list>
@@ -15,11 +15,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iterator>
-#include <iostream>
 
-#include "Point.h"
-#include "AntTweakBar.h"
-#include "Fenetrage.h"
 
 GLint referenceX = 0; //Declar reference points used to drag 
 GLint referenceY = 0; // the rectangle 
@@ -35,38 +31,18 @@ int down = FALSE;
 int left = FALSE;
 int right = FALSE;
 
-
-bool begin_window = FALSE;
-bool begin_poly = FALSE;
 bool finish_window = FALSE;
 bool finish_poly = FALSE;
 bool finish_fenetrage = FALSE;
 
+struct Point
+{
+	Point(float x, float y) : x(x), y(y) {}
+	float x, y;
+};
 std::vector< Point > points_window;
 std::vector< Point > points_poly;
 std::vector< Point > points_solution;
-
-// Menu items
-enum MENU_TYPE
-{
-	MENU_DRAW_POLYGON,
-	MENU_DRAW_WINDOW,
-	MENU_COLORS,
-	MENU_FENETRAGE,
-	MENU_REMPLISSAGE,
-};
-
-enum COLOR_TYPE
-{
-	COLOR_RED,
-	COLOR_BLUE,
-	COLOR_GREEN,
-	COLOR_YELLOW,
-	COLOR_VIOLET,
-};
-
-int redP = 0, greenP = 0, blueP = 0;
-int redW = 0, greenW = 0, blueW = 0;
 
 void Initialize()
 {
@@ -87,9 +63,9 @@ void mouse(int button, int state, int x, int y)
 {
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
 	{
-		if (begin_window)
+		if (!finish_window)
 			points_window.push_back(Point(x, y));
-		if (begin_poly)
+		if (!finish_poly && finish_window)
 			points_poly.push_back(Point(x, y));
 	}
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
@@ -105,23 +81,15 @@ void keyboard(unsigned char key, int x, int y)
 	{
 		case 27: exit(0); break;
 		case 32:
-			if (begin_poly)
-			{
-				begin_poly = FALSE;
+			if (finish_window)
 				finish_poly = TRUE;
-			}
-			if (begin_window)
-			{
-				begin_window = FALSE;
-				finish_window = TRUE;
-			}
-			
+			finish_window = TRUE;
 			break;
 	}
 	glutPostRedisplay();
 }
 
-void drawLines(std::vector<Point> points)
+void drawLines(std::vector< Point > points)
 {
 	for (size_t i = 0; i < points.size(); ++i)
 	{
@@ -162,27 +130,73 @@ void drawPoints(std::vector< Point > points)
 	glEnd();
 }
 
-void DrawPoly()
+
+bool isVisble(Point point)
 {
-	glColor3ub(redP, greenP, blueP);
-	drawPoints(points_poly);
-	drawLines(points_poly);
+<<<<<<< HEAD
+	float minX = points_window[0].x;
+	float maxX = points_window[0].x;
+	float minY = points_window[0].y;
+	float maxY = points_window[0].y;
+	for (size_t i = 1; i < points_window.size(); i++)
+	{
+		Point q = points_window[i];
+		minX = std::min(q.x, minX);
+		maxX = std::max(q.x, maxX);
+		minY = std::min(q.y, minY);
+		maxY = std::max(q.y, maxY);
+	}
+
+	//Check the extreme border
+	if (point.x < minX || point.x > maxX || point.y < minY || point.y > maxY)
+	{
+		return false;
+	}
+
+	bool inside = false;
+	for (size_t i = 0, j = points_window.size() - 1; i < points_window.size(); j = i++)
+	{
+		if ((points_window[i].y > point.y) != (points_window[j].y > point.y) && point.x < (points_window[j].x - points_window[i].x) * (point.y - points_window[i].y) / (points_window[j].y - points_window[i].y) + points_window[i].x)
+		{
+			inside = !inside;
+		}
+	}
+
+	return inside;
 }
 
-void DrawWindow()
+glm::vec2 cut(glm::vec2 line1, glm::vec2 line2)
 {
-	glColor3ub(redW, greenW, blueW);
-	drawPoints(points_window);
-	drawLines(points_window);
+	glm::vec2 v3;
+	return v3;
 }
 
-void DrawSolution()
+void Fenetrage()
 {
-	glColor3ub(255, 255, 255);
-	drawPoints(points_solution);
-	drawLines(points_solution);
-}
+	for (size_t i = 0; i < points_window.size(); i++)
+	{
+		for (size_t i = 0; i < points_poly.size(); i++)
+		{
+			if (isVisble(points_poly[i]))
+				points_solution.push_back(points_poly[i]);
+			else
+			{
+				Point a = points_poly[i - 1];
+				Point b = points_poly[i];
+				glm::vec2 linePoly = { b.x - a.x, b.y - a.y };
 
+				Point a_window = points_window[i - 1];
+				Point b_window = points_window[i];
+				glm::vec2 lineWindow = { b_window.x - a_window.x, b_window.y - a_window.y };
+
+				glm::vec2 point = cut(linePoly, lineWindow);
+				printf("%d %d", point.r, point.s);
+			}
+		}
+	}
+
+	finish_fenetrage = TRUE;
+}
 
 void display(void)
 {
@@ -198,149 +212,41 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glColor3ub(0, 0, 0);
+	glColor3ub(255, 0, 0);
+	drawPoints(points_window);
+	if (finish_window)
+		drawLines(points_window);
 
-	if (begin_poly)
-	{
-		glColor3ub(redP, greenP, blueP);
-		drawPoints(points_poly);
-	}
+	glColor3ub(0, 255, 0);
+	drawPoints(points_poly);
+	if (finish_poly)
+		drawLines(points_poly);
 
 	if (finish_poly)
-		DrawPoly();
-
-	if (begin_window)
-	{
-		DrawPoly();
-		glColor3ub(redW, greenW, blueW);
-		drawPoints(points_window);
-	}
-		
-	if (finish_window)
-	{
-		DrawPoly();
-		DrawWindow();
-	}
+		Fenetrage();
 
 	if (finish_fenetrage)
 	{
-		DrawSolution();
-		DrawWindow();
+		points_poly.clear();
+		drawPoints(points_solution);
+		drawLines(points_solution);
 	}
 	
 	glutSwapBuffers();
 
 }
 
-// Menu handling function definition
-void menu(int item)
-{
-	switch (item)
-	{
-		case MENU_DRAW_POLYGON:
-		{
-			begin_poly = TRUE;
-			break;
-		}
-		case MENU_DRAW_WINDOW:
-		{
-			begin_window = TRUE;
-			finish_poly = FALSE;
-			break;
-		}
-
-		case MENU_FENETRAGE:
-		{
-			points_solution = Fenetrage(points_window, points_poly, finish_fenetrage);
-			points_poly.clear();
-			break;
-		}
-
-		default:
-		{
-
-			break;
-		}
-	}
-	glutPostRedisplay();
-}
-
-void processColorMenu(int option)
-{
-	switch (option) 
-	{
-		case COLOR_RED:
-			red = 255;
-			green = 0;
-			blue = 0; break;
-		case COLOR_BLUE:
-			red = 0;
-			green = 0;
-			blue = 255; break;
-		case COLOR_GREEN:
-			red = 0;
-			green = 255;
-			blue = 0; break;
-		case COLOR_YELLOW:
-			red = 128;
-			green = 128;
-			blue = 0; break;
-		case COLOR_VIOLET:
-			red = 0;
-			green = 128;
-			blue = 128; break;
-
-		default:
-		{
-			break;
-		}
-	}
-
-	if (redP == 0 && greenP == 0 && blueP == 0)
-	{
-		redP = red;
-		greenP = green;
-		blueP = blue;
-	}
-
-	else if (redP != 0 || greenP != 0 || blueP != 0)
-	{
-		redW = red;
-		greenW = green;
-		blueW = blue;
-	}
-}
-
 int main(int argc, char** argv)
 {
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(640, 480);
+	glutInitWindowSize(800, 600);
 	glutCreateWindow("OpenGL");
 
+	Initialize();
 	glutMouseFunc(mouse);
 	glutKeyboardFunc(keyboard);
 	glutDisplayFunc(display);
-
-	
-	int colorMenu = glutCreateMenu(processColorMenu);
-	glutAddMenuEntry("Red", COLOR_RED);
-	glutAddMenuEntry("Green", COLOR_GREEN);
-	glutAddMenuEntry("Blue", COLOR_BLUE);
-	glutAddMenuEntry("Yellow", COLOR_YELLOW);
-	glutAddMenuEntry("Violet", COLOR_VIOLET);
-
-	glutCreateMenu(menu);
-	glutAddMenuEntry("Draw polygon", MENU_DRAW_POLYGON);
-	glutAddMenuEntry("Draw window", MENU_DRAW_WINDOW);
-	glutAddMenuEntry("Colors", MENU_COLORS);
-	glutAddMenuEntry("Fenetrage", MENU_FENETRAGE);
-	glutAddMenuEntry("Remplissage", MENU_REMPLISSAGE);
-
-	glutAddSubMenu("Color", colorMenu);
-	glutAttachMenu(GLUT_RIGHT_BUTTON);
-
 	glutMainLoop();
 	return 0;
 }
