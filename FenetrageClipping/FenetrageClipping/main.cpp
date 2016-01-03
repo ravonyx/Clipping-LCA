@@ -42,9 +42,13 @@ bool finish_window = FALSE;
 bool finish_poly = FALSE;
 bool finish_fenetrage = FALSE;
 
+float zoomFactor = 1;
+
 std::vector< Point > points_window;
 std::vector< Point > points_poly;
 std::vector< Point > points_solution;
+
+Point cursor;
 
 // Menu items
 enum MENU_TYPE
@@ -68,6 +72,9 @@ enum COLOR_TYPE
 int redP = 0, greenP = 0, blueP = 0;
 int redW = 0, greenW = 0, blueW = 0;
 
+int width = 640;
+int height = 480;
+
 void Initialize()
 {
 	printf("Version OpenGL : %s\n", glGetString(GL_VERSION));
@@ -83,43 +90,7 @@ void Initialize()
 		printf("Extensions[%d] : %s\n", index, glGetStringi(GL_EXTENSIONS, index));
 }
 
-void mouse(int button, int state, int x, int y)
-{
-	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
-	{
-		if (begin_window)
-			points_window.push_back(Point(x, y));
-		if (begin_poly)
-			points_poly.push_back(Point(x, y));
-	}
-	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
-	{
-		points_window.clear();
-	}
-	glutPostRedisplay();
-}
 
-void keyboard(unsigned char key, int x, int y)
-{
-	switch (key) 
-	{
-		case 27: exit(0); break;
-		case 32:
-			if (begin_poly)
-			{
-				begin_poly = FALSE;
-				finish_poly = TRUE;
-			}
-			if (begin_window)
-			{
-				begin_window = FALSE;
-				finish_window = TRUE;
-			}
-			
-			break;
-	}
-	glutPostRedisplay();
-}
 
 void drawLines(std::vector<Point> points)
 {
@@ -149,17 +120,16 @@ void drawLines(std::vector<Point> points)
 
 void drawPoints(std::vector< Point > points)
 {
-	glBegin(GL_QUADS);
+	
 	for (size_t i = 0; i < points.size(); ++i)
 	{
 		const unsigned int SIZE = 5;
 		const Point& pt = points[i];
-		glVertex2i(pt.x - SIZE, pt.y - SIZE);
-		glVertex2i(pt.x + SIZE, pt.y - SIZE);
-		glVertex2i(pt.x + SIZE, pt.y + SIZE);
-		glVertex2i(pt.x - SIZE, pt.y + SIZE);
+		glBegin(GL_POINTS);
+		glPointSize(10);
+		glVertex2i(pt.x, pt.y);
+		glEnd();
 	}
-	glEnd();
 }
 
 void DrawPoly()
@@ -191,9 +161,8 @@ void display(void)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	int w = glutGet(GLUT_WINDOW_WIDTH);
-	int h = glutGet(GLUT_WINDOW_HEIGHT);
-	glOrtho(0, w, h, 0, -1, 1);
+	glOrtho(-(width/2), (width/2), -(height/2), height/2, -1, 1);
+	glScaled(zoomFactor, zoomFactor, 1);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -311,19 +280,96 @@ void processColorMenu(int option)
 	}
 }
 
+void mouseZoom(int button, int dir, int x, int y)
+{
+	if (dir > 0)
+		zoomFactor -= 0.05f;
+	else
+		zoomFactor += 0.05f;
+
+	if (zoomFactor < 0.5)
+		zoomFactor = 0.5;
+	else if (zoomFactor > 2)
+		zoomFactor = 2;
+	std::cout << zoomFactor << std::endl;
+	glutPostRedisplay();
+}
+
+
+void mouseMove(int x, int y)
+{
+	y = height - y;
+	x = x - (width / 2);
+	y = y - (height / 2);
+
+	x = x / zoomFactor;
+	y = y / zoomFactor;
+	cursor = Point(x, y);
+
+	std::cout << "Mouse at : " << cursor.x << "," << cursor.y << std::endl;
+}
+
+void mouse(int button, int state, int x, int y)
+{
+	y = height - y;
+	x = x - (width / 2);
+	y = y - (height / 2);
+
+	x = x / zoomFactor;
+	y = y / zoomFactor;
+
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP)
+	{
+		if (begin_window)
+			points_window.push_back(Point(x, y));
+		if (begin_poly)
+			points_poly.push_back(Point(x, y));
+	}
+	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
+	{
+		points_window.clear();
+	}
+
+	std::cout << "Mouse at : " << x << "," << y << std::endl;
+	glutPostRedisplay();
+}
+
+void keyboard(unsigned char key, int x, int y)
+{
+	switch (key)
+	{
+	case 27: exit(0); break;
+	case 32:
+		if (begin_poly)
+		{
+			begin_poly = FALSE;
+			finish_poly = TRUE;
+		}
+		if (begin_window)
+		{
+			begin_window = FALSE;
+			finish_window = TRUE;
+		}
+
+		break;
+	}
+	glutPostRedisplay();
+}
+
 int main(int argc, char** argv)
 {
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(640, 480);
+	glutInitWindowSize(width, height);
 	glutCreateWindow("OpenGL");
 
 	glutMouseFunc(mouse);
 	glutKeyboardFunc(keyboard);
 	glutDisplayFunc(display);
+	glutMouseWheelFunc(mouseZoom);
+	glutPassiveMotionFunc(mouseMove);
 
-	
 	int colorMenu = glutCreateMenu(processColorMenu);
 	glutAddMenuEntry("Red", COLOR_RED);
 	glutAddMenuEntry("Green", COLOR_GREEN);
@@ -334,11 +380,10 @@ int main(int argc, char** argv)
 	glutCreateMenu(menu);
 	glutAddMenuEntry("Draw polygon", MENU_DRAW_POLYGON);
 	glutAddMenuEntry("Draw window", MENU_DRAW_WINDOW);
-	glutAddMenuEntry("Colors", MENU_COLORS);
 	glutAddMenuEntry("Fenetrage", MENU_FENETRAGE);
 	glutAddMenuEntry("Remplissage", MENU_REMPLISSAGE);
 
-	glutAddSubMenu("Color", colorMenu);
+	glutAddSubMenu("Colors", colorMenu);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
