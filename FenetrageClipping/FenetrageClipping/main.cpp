@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <list>
 #include <vector>
-#include <cmath>
-#include <algorithm>
+
+
 #include <iterator>
 #include <iostream>
 
@@ -41,6 +41,7 @@ bool begin_poly = FALSE;
 bool finish_window = FALSE;
 bool finish_poly = FALSE;
 bool finish_fenetrage = FALSE;
+bool move_window = FALSE;
 
 float zoomFactor = 1;
 
@@ -55,8 +56,9 @@ enum MENU_TYPE
 {
 	MENU_DRAW_POLYGON,
 	MENU_DRAW_WINDOW,
-	MENU_COLORS,
-	MENU_FENETRAGE,
+	MENU_MOVE,
+	MENU_COLORS_POLY,
+	MENU_COLORS_WINDOW,
 	MENU_REMPLISSAGE,
 };
 
@@ -67,13 +69,21 @@ enum COLOR_TYPE
 	COLOR_GREEN,
 	COLOR_YELLOW,
 	COLOR_VIOLET,
+	COLOR_ORANGE,
 };
 
-int redP = 0, greenP = 0, blueP = 0;
-int redW = 0, greenW = 0, blueW = 0;
+int redP = 255, greenP = 0, blueP = 0;
+int redW = 0, greenW = 255, blueW = 0;
 
 int width = 640;
 int height = 480;
+
+float moveX = 0;
+float moveY = 0;
+
+int lastMouseX, lastMouseY;
+int lastMoveX, lastMoveY;
+int firstMouseX, firstMouseY;
 
 void Initialize()
 {
@@ -88,6 +98,8 @@ void Initialize()
 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 	for (auto index = 0; index < numExtensions; ++index)
 		printf("Extensions[%d] : %s\n", index, glGetStringi(GL_EXTENSIONS, index));
+
+	glColor3ub(redW, greenW, blueW);
 }
 
 
@@ -167,7 +179,7 @@ void display(void)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	glColor3ub(0, 0, 0);
+	glColor3ub(1, 1, 1);
 
 	if (begin_poly)
 	{
@@ -188,14 +200,38 @@ void display(void)
 	if (finish_window)
 	{
 		DrawPoly();
+
+		moveX = firstMouseX - lastMouseX;
+		moveY = firstMouseY - lastMouseY;
+
+		if (moveX != lastMoveX || moveY != lastMoveX)
+		{
+			if (moveX != lastMoveX)
+			{
+				for (size_t i = 0; i < points_window.size(); ++i)
+					points_window[i].x -= moveX - lastMoveX;
+				lastMoveX = moveX;
+			}
+			if (moveY != lastMoveY)
+			{
+				for (size_t i = 0; i < points_window.size(); ++i)
+					points_window[i].y -= moveY - lastMoveY;
+				lastMoveY = moveY;
+
+			}
+			std::cout << "Fenetrage" << std::endl;
+		    Fenetrage(points_solution, points_window, points_poly, finish_fenetrage);
+		}
+		//std::cout << "Move " << moveX << " " << moveY << std::endl;
 		DrawWindow();
+		DrawSolution();
 	}
 
-	if (finish_fenetrage)
+/*	if (finish_fenetrage)
 	{
 		DrawSolution();
 		DrawWindow();
-	}
+	}*/
 	
 	glutSwapBuffers();
 
@@ -218,10 +254,9 @@ void menu(int item)
 			break;
 		}
 
-		case MENU_FENETRAGE:
+		case MENU_MOVE:
 		{
-			points_solution = Fenetrage(points_window, points_poly, finish_fenetrage);
-			points_poly.clear();
+			move_window = true;
 			break;
 		}
 
@@ -233,51 +268,58 @@ void menu(int item)
 	}
 	glutPostRedisplay();
 }
-
-void processColorMenu(int option)
+void processColorWindowMenu(int option)
 {
-	switch (option) 
+	switch (option)
 	{
-		case COLOR_RED:
-			red = 255;
-			green = 0;
+		case COLOR_GREEN:
+			red = 0;
+			green = 153;
 			blue = 0; break;
 		case COLOR_BLUE:
 			red = 0;
 			green = 0;
-			blue = 255; break;
-		case COLOR_GREEN:
-			red = 0;
-			green = 255;
+			blue = 204; break;
+		case COLOR_VIOLET:
+			red = 153;
+			green = 0;
+			blue = 153; break;
+		
+		default:
+		{
+			break;
+		}
+	}
+	redW = red;
+	greenW = green;
+	blueW = blue;
+}
+
+void processColorPolyMenu(int option)
+{
+	switch (option) 
+	{
+		case COLOR_RED:
+			red = 204;
+			green = 0;
+			blue = 0; break;
+		case COLOR_ORANGE:
+			red = 255;
+			green = 128;
 			blue = 0; break;
 		case COLOR_YELLOW:
-			red = 128;
-			green = 128;
-			blue = 0; break;
-		case COLOR_VIOLET:
-			red = 0;
-			green = 128;
-			blue = 128; break;
+			red = 255;
+			green = 255;
+			blue = 51; break;
 
 		default:
 		{
 			break;
 		}
 	}
-
-	if (redP == 0 && greenP == 0 && blueP == 0)
-	{
-		redP = red;
-		greenP = green;
-		blueP = blue;
-	}
-
-	else if (redP != 0 || greenP != 0 || blueP != 0)
-	{
-		redW = red;
-		greenW = green;
-		blueW = blue;
-	}
+	redP = red;
+	greenP = green;
+	blueP = blue;
 }
 
 void mouseZoom(int button, int dir, int x, int y)
@@ -298,15 +340,20 @@ void mouseZoom(int button, int dir, int x, int y)
 
 void mouseMove(int x, int y)
 {
-	y = height - y;
-	x = x - (width / 2);
-	y = y - (height / 2);
+	if (move_window)
+	{
+		y = height - y;
+		x = x - (width / 2);
+		y = y - (height / 2);
 
-	x = x / zoomFactor;
-	y = y / zoomFactor;
-	cursor = Point(x, y);
+		x = x / zoomFactor;
+		y = y / zoomFactor;
+		cursor = Point(x, y);
 
-	std::cout << "Mouse at : " << cursor.x << "," << cursor.y << std::endl;
+		lastMouseX = x;
+		lastMouseY = y;
+	}
+	glutPostRedisplay();
 }
 
 void mouse(int button, int state, int x, int y)
@@ -325,12 +372,23 @@ void mouse(int button, int state, int x, int y)
 		if (begin_poly)
 			points_poly.push_back(Point(x, y));
 	}
+
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN)
+	{
+		firstMouseX = x;
+		firstMouseY = y;
+		lastMoveX = firstMouseX - lastMouseX;
+		lastMoveY = firstMouseY - lastMouseY;
+
+		std::cout << "LastMove " << lastMoveX << "," << lastMoveY << std::endl;
+	}
+
+
 	if (button == GLUT_RIGHT_BUTTON && state == GLUT_UP)
 	{
 		points_window.clear();
 	}
 
-	std::cout << "Mouse at : " << x << "," << y << std::endl;
 	glutPostRedisplay();
 }
 
@@ -368,22 +426,26 @@ int main(int argc, char** argv)
 	glutKeyboardFunc(keyboard);
 	glutDisplayFunc(display);
 	glutMouseWheelFunc(mouseZoom);
-	glutPassiveMotionFunc(mouseMove);
+	glutMotionFunc(mouseMove);
 
-	int colorMenu = glutCreateMenu(processColorMenu);
+	int colorPolyMenu = glutCreateMenu(processColorPolyMenu);
 	glutAddMenuEntry("Red", COLOR_RED);
+	glutAddMenuEntry("Orange", COLOR_ORANGE);
+	glutAddMenuEntry("Yellow", COLOR_YELLOW);
+
+	int colorWindowMenu = glutCreateMenu(processColorWindowMenu);
 	glutAddMenuEntry("Green", COLOR_GREEN);
 	glutAddMenuEntry("Blue", COLOR_BLUE);
-	glutAddMenuEntry("Yellow", COLOR_YELLOW);
 	glutAddMenuEntry("Violet", COLOR_VIOLET);
 
 	glutCreateMenu(menu);
+	glutAddSubMenu("Colors for Poly", colorPolyMenu);
+	glutAddSubMenu("Colors for Window", colorWindowMenu);
 	glutAddMenuEntry("Draw polygon", MENU_DRAW_POLYGON);
 	glutAddMenuEntry("Draw window", MENU_DRAW_WINDOW);
-	glutAddMenuEntry("Fenetrage", MENU_FENETRAGE);
+	glutAddMenuEntry("Move window", MENU_MOVE);
 	glutAddMenuEntry("Remplissage", MENU_REMPLISSAGE);
 
-	glutAddSubMenu("Colors", colorMenu);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
