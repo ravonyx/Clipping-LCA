@@ -5,10 +5,10 @@ float isVisble(Point p1, Point p2, Point p_to_test)
 	glm::vec2 AB = { p2.x - p1.x, p2.y - p1.y };
 
 
-	int length = sqrtf(AB.x * AB.x + AB.y * AB.y);
+	float length = sqrtf(AB.x * AB.x + AB.y * AB.y);
 	AB /= length;
 
-	glm::vec2 normal_ext(AB.y, -AB.x);
+	//glm::vec2 normal_ext(AB.y, -AB.x);
 	glm::vec2 normal_int(-AB.y, AB.x);
 
 	glm::vec2 droite(p1.x - p_to_test.x, p1.y - p_to_test.y);
@@ -20,7 +20,7 @@ float isVisble(Point p1, Point p2, Point p_to_test)
 bool isInside(Point point, std::vector< Point > &points)
 {
 	bool inside = false;
-	int i, j;
+	size_t i, j;
 	for (i = 0, j = points.size() - 1; i < points.size(); j = i++)
 	{
 		if (((points[i].y >= point.y) != (points[j].y >= point.y)) && (point.x <= (points[j].x - points[i].x) * (point.y - points[i].y) / (points[j].y - points[i].y) + points[i].x))
@@ -44,141 +44,87 @@ bool cut(Point p1, Point p2, Point p3, Point p4, glm::vec2 &result)
 	float s = result.y;
 
 	bool is_cut = false;
-
-	if (t > 0 && t < 1 && s > 0 && s < 1)
+	const bool tIn = t > 0 && t < 1;
+	const bool sIn = s > 0 && s < 1;
+	if ((sIn && tIn) || (!sIn && tIn))
 		is_cut = true;
 	else
 		is_cut = false;
 	return is_cut;
 }
 
-void Fenetrage(std::vector< Point > &points_solution, std::vector< Point > &points_window, std::vector< Point > points_poly, bool &finish_fenetrage)
+void add_intersection(Point p1, Point p2, std::vector< Point > &points_solution, float t)
 {
-	int nb_points_window = points_window.size();
-	int nb_points_poly = points_poly.size();
+	glm::vec2 AB = { p2.x - p1.x, p2.y - p1.y };
+	glm::vec2 part = AB * t;
+	glm::vec2 intersect = { p1.x + part.x, p1.y + part.y };
+	points_solution.push_back(Point(intersect.x, intersect.y));
+}
+void Fenetrage(std::vector< Point > &points_solution, std::vector< Point > &points_window, std::vector< Point > &points_poly, bool &finish_fenetrage)
+{
+	size_t nb_points_poly = points_poly.size();
+
+	std::vector<Point> points_win_copy = points_window;
+	points_win_copy.push_back(points_window[0]);
+	size_t nb_points_window = points_win_copy.size();
+
 	std::vector<Point> points_poly_copy = points_poly;
 	int nb_points_solutions;
 
 	std::cout << "Nb points poly " << nb_points_poly << std::endl;
+	std::cout << "Nb points window " << nb_points_window << std::endl;
 	nb_points_solutions = 0;
 
-	Point save_point;
-	Point save_point_window;
-	for (size_t j = 0; j < nb_points_window; j++)
+	Point prev_point_poly;
+	Point f;
+	int last_index_poly;
+
+	for (size_t j = 0; j < nb_points_window - 1; j++)
 	{
 		points_solution.clear();
 		nb_points_solutions = 0;
 
-		if (j == 0)
-			save_point_window = points_window[j];
+		Point p3 = points_win_copy[j];
+		Point p4 = points_win_copy[j + 1];
+
 		for (size_t i = 0; i < nb_points_poly; i++)
 		{
-			
-
+			Point current_point_poly = points_poly_copy[i];
 			if (i == 0)
-				save_point = points_poly_copy[i];
+				f = current_point_poly;
 			else
 			{
-				Point p1 = points_poly_copy[i - 1];
-				Point p2 = points_poly_copy[i];
-
-				Point p3 = points_window[j];
-				Point p4;
-				if (j + 1 == nb_points_window)
-					p4 = save_point_window;
-				else
-					p4 = points_window[j + 1];
 				glm::vec2 res1;
-				if (cut(p1, p2, p3, p4, res1))
+				//std::cout << "Test " << "Point win " << j << "," << j + 1 << " with " << i - 1 << "," << i << std::endl;
+				if (cut(prev_point_poly, current_point_poly, p3, p4, res1))
 				{
-					float t = res1.x;
-					float s = res1.y;
-
-					glm::vec2 AB = { p2.x - p1.x, p2.y - p1.y };
-					glm::vec2 part = AB * t;
-					glm::vec2 intersect = { p1.x + part.x, p1.y + part.y };
-					points_solution.push_back(Point(intersect.x, intersect.y));
+					add_intersection(prev_point_poly, current_point_poly, points_solution, res1.x);
+					std::cout << "Point win " << j << "," << j + 1 << " cut with Point poly " << i - 1 << "," << i << std::endl;
 					nb_points_solutions++;
 				}
 			}
-
-			std::cout << "Point window " << j << std::endl;
-			Point p3 = points_window[j];
-			Point p4;
-			if (j + 1 == nb_points_window)
-				p4 = save_point_window;
-			else
-				p4 = points_window[j + 1];
-
-			if (isVisble(p3, p4, points_poly_copy[i]) > 0)
+			last_index_poly = i;
+			prev_point_poly = current_point_poly;
+			if (isVisble(p3, p4, prev_point_poly) > 0)
 			{
-				points_solution.push_back(points_poly_copy[i]);
+				points_solution.push_back(prev_point_poly);
 				nb_points_solutions++;
-				std::cout << "Point poly " << i << " visible" << std::endl;
 			}
-
-			else
-				std::cout << "Point poly " << i << " pas visible" << std::endl;
-
 		}
 		if (nb_points_solutions > 0)
 		{
-			Point p1 = save_point;
-			Point p2 = points_poly_copy[nb_points_poly - 1];
-
-			Point p3 = points_window[j];
-			Point p4;
-			if (j + 1 == nb_points_window)
-				p4 = save_point_window;
-			else
-				p4 = points_window[j + 1];
-
 			glm::vec2 res2;
-			if (cut(p1, p2, p3, p4, res2))
+			if (cut(prev_point_poly, f, p3, p4, res2))
 			{
-				float t = res2.x;
-				float s = res2.y;
-
-				glm::vec2 AB = { p2.x - p1.x, p2.y - p1.y };
-				glm::vec2 part = AB * t;
-				glm::vec2 intersect = { p1.x + part.x, p1.y + part.y };
-				points_solution.push_back(Point(intersect.x, intersect.y));
+				add_intersection(prev_point_poly, f, points_solution, res2.x);
+				std::cout << "Points soluce > 0 Point win " << j << "," << j + 1 << " cut with Point poly " << last_index_poly << "," << 0 << std::endl;
 				nb_points_solutions++;
 			}
-			points_poly_copy = points_solution;
-			nb_points_poly = nb_points_solutions;
-
 		}
-	}
-
-	Point inside;
-	bool found = false;
-	for (size_t i = 0; i < points_window.size(); i++)
-	{
-		if (isInside(points_window[i], points_poly))
-		{
-			inside = points_window[i];
-			found = true;
-		}
-		
-	}
-	std::cout << " Found " << found << std::endl;
-	if (found)
-	{
-		int lastDiff = 5000, diff = 0, index_to_add = -1;
-		Point point_to_add;
-		for (size_t i = 0; i < points_solution.size(); i++)
-		{
-			diff = sqrt(pow(points_solution[i].x - inside.x, 2) + pow(points_solution[i].y - inside.y, 2));
-			std::cout << diff << std::endl;
-			if (diff < lastDiff)
-			{
-				index_to_add = i;
-				lastDiff = diff;
-			}	
-		}
-		points_solution[index_to_add] = inside;
+		points_poly_copy = points_solution;
+		nb_points_poly = nb_points_solutions;
 	}
 	
 	finish_fenetrage = true;
 }
+
