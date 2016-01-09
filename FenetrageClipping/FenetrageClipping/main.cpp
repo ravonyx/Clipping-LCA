@@ -20,6 +20,7 @@
 #include "Point.h"
 #include "AntTweakBar.h"
 #include "Fenetrage.h"
+#include "Remplissage.h"
 
 GLint referenceX = 0; //Declar reference points used to drag 
 GLint referenceY = 0; // the rectangle 
@@ -42,6 +43,8 @@ bool finish_window = FALSE;
 bool finish_poly = FALSE;
 bool finish_fenetrage = FALSE;
 bool move_window = FALSE;
+
+bool fill_polygon = FALSE;
 
 float zoomFactor = 1;
 
@@ -226,6 +229,13 @@ void display(void)
 		DrawWindow();
 		DrawSolution();
 	}
+	if (fill_polygon)
+	{
+		printf("Remplissage\n");
+		glColor3ub(redP, greenP, blueP);
+		drawPoints(DrawInsidePixel(points_poly, width, height, zoomFactor));
+		fill_polygon = FALSE;
+	}
 
 /*	if (finish_fenetrage)
 	{
@@ -260,6 +270,11 @@ void menu(int item)
 			break;
 		}
 
+		case MENU_REMPLISSAGE:
+		{
+			fill_polygon = TRUE;
+			break;
+		}
 		default:
 		{
 

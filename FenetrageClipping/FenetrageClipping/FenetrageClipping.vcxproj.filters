@@ -24,12 +24,24 @@
     <ClCompile Include="Fenetrage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Remplissage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="triangle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Point.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Fenetrage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Remplissage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="triangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
