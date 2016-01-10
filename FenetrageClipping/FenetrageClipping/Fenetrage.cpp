@@ -17,7 +17,7 @@ float isVisble(Point p1, Point p2, Point p_to_test)
 	return result;
 }
 
-bool isInside(Point point, std::vector< Point > &points)
+bool isInside(Point point, const std::vector< Point > &points)
 {
 	bool inside = false;
 	size_t i, j;
@@ -60,7 +60,7 @@ void add_intersection(Point p1, Point p2, std::vector< Point > &points_solution,
 	glm::vec2 intersect = { p1.x + part.x, p1.y + part.y };
 	points_solution.push_back(Point(intersect.x, intersect.y));
 }
-void Fenetrage(std::vector< Point > &points_solution, std::vector< Point > &points_window, std::vector< Point > &points_poly, bool &finish_fenetrage)
+void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point > &points_window, const std::vector< Point > &points_poly, bool &finish_fenetrage)
 {
 	size_t nb_points_poly = points_poly.size();
 
