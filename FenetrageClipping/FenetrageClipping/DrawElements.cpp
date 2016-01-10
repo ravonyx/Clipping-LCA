@@ -9,13 +9,15 @@ void drawLines(const std::vector<Point> &points)
 }
 void drawPoints(const std::vector< Point > &points)
 {
+	glBegin(GL_POINTS);
 	for (size_t i = 0; i < points.size(); ++i)
 	{
-		glBegin(GL_POINTS);
+		
 		glPointSize(10);
 		glVertex2i(points[i].x, points[i].y);
-		glEnd();
+	
 	}
+	glEnd();
 }
 
 /*void drawCircle(int x, int y, int nb_circle_points, int radius)

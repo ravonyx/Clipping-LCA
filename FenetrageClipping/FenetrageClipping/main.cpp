@@ -19,6 +19,9 @@
 #include "Interfaces.h"
 
 extern s_display_manager g_display_manager;
+#include "Remplissage.h"
+
+bool fill_polygon = false;
 float zoomFactor = 1;
 
 std::vector< Point > points_window;
@@ -65,34 +68,43 @@ void menu(int item)
 {
 	switch (item)
 	{
-	case MENU_DRAW_POLYGON:
-	{
-		g_display_manager.begin_poly = true;
-		break;
-	}
-	case MENU_DRAW_WINDOW:
-	{
-		g_display_manager.begin_window = true;
-		g_display_manager.finish_poly = false;
-		break;
-	}
+		case MENU_DRAW_POLYGON:
+		{
+			g_display_manager.begin_poly = true;
+			break;
+		}
+		case MENU_DRAW_WINDOW:
+		{
+			g_display_manager.begin_window = true;
+			g_display_manager.finish_poly = false;
+			break;
+		}
 
-	case MENU_MOVE:
-	{
-		g_display_manager.move_window = true;
-		break;
+		case MENU_MOVE:
+		{
+			g_display_manager.move_window = true;
+			break;
+		}
+		case MENU_DRAW_CIRCLE:
+		{
+			g_display_manager.begin_circle = true;
+		}
+
+		case MENU_REMPLISSAGE:
+		{
+			fill_polygon = true;
+			break;
+		}
+
+		default:
+		{
+			break;
+		}
 	}
-	case MENU_DRAW_CIRCLE:
-	{
-		g_display_manager.begin_circle = true;
-	}
-	default:
-	{
-		break;
-	}
-	}
-	glutPostRedisplay();
+	
+	glutSwapBuffers();
 }
+
 
 void processColorWindowMenu(int option)
 {
@@ -344,6 +356,15 @@ void display(void)
 		if(moveRadius > 0)
 			drawCircle(center.x, center.y, 100, moveRadius);
 	}
+
+	if (fill_polygon)
+	{
+		printf("Remplissage\n");
+		glColor3ub(redP, greenP, blueP);
+		drawPoints(DrawInsidePixel(points_poly, width, height, zoomFactor));
+		fill_polygon = false;
+	}
+
 	if (g_display_manager.finish_circle)
 		drawCircle(center.x, center.y, 100, radius);
 		
