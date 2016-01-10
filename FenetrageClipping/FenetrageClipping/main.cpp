@@ -233,7 +233,7 @@ void display(void)
 	{
 		printf("Remplissage\n");
 		glColor3ub(redP, greenP, blueP);
-		drawPoints(DrawInsidePixel(points_poly, width, height, zoomFactor));
+		drawPoints(DrawInsidePixel(points_solution, width, height, zoomFactor));
 		fill_polygon = FALSE;
 	}
 
