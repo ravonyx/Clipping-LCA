@@ -8,5 +8,7 @@
 #include "triangle.h"
 
 std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint,int width,int height,float zoomFactor);
+std::vector<Triangle> getTriangleInPoly(std::vector<Point> &PolygonPoint);
+std::vector<Point> getSurroundRect(std::vector<Point> &PolygonPoint);
 bool PointInTriangle(Point pt, Point v1, Point v2, Point v3);
 float sign(Point p1, Point p2, Point p3);

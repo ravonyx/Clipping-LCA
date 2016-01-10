@@ -362,7 +362,7 @@ void display(void)
 		printf("Remplissage\n");
 		glColor3ub(redP, greenP, blueP);
 		drawPoints(DrawInsidePixel(points_solution, width, height, zoomFactor));
-		fill_polygon = false;
+		//fill_polygon = false;
 	}
 
 	if (g_display_manager.finish_circle)
