@@ -41,8 +41,9 @@ std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint, int width, 
 		x = x - (width / 2);
 		y = y - (height / 2);
 
-		x = x / zoomFactor;
-		y = y / zoomFactor;
+		//x = x / zoomFactor;
+		//y = y / zoomFactor;
+
 		for (int k = 0; k < PolygonTriangle.size(); k++)
 			if (PointInTriangle(Point(x, y), PolygonTriangle[k].A , PolygonTriangle[k].B, PolygonTriangle[k].C))
 			{
