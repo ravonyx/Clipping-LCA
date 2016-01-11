@@ -100,8 +100,7 @@ void menu(int item)
 			break;
 		}
 	}
-	
-	glutSwapBuffers();
+	glutPostRedisplay();
 }
 
 
@@ -309,7 +308,6 @@ void display(void)
 
 	if (g_display_manager.begin_window)
 	{
-		DrawPoly(points_poly, redP, greenP, blueP);
 		glColor3ub(redW, greenW, blueW);
 		drawPoints(points_window);
 	}
@@ -404,8 +402,7 @@ void display(void)
 	if (fill_polygon)
 	{
 		glColor3ub(redP, greenP, blueP);
-		std::vector <Point> inside_points;
-		DrawInsidePixel(inside_points, points_solution, width, height, zoomFactor);
+		std::vector <Point> inside_points = DrawInsidePixel(points_solution, width, height, zoomFactor);
 		drawPoints(inside_points);
 	}
 
