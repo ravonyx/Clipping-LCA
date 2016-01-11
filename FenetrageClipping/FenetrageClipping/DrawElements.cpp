@@ -7,39 +7,21 @@ void drawLines(const std::vector<Point> &points)
 		glVertex3f(points[i].x, points[i].y, 0);
 	glEnd();
 }
-void drawPoints(const std::vector< Point > &points)
+void drawPoints(const std::vector< Point > &points, float size)
 {
+	glPointSize(size);
 	glBegin(GL_POINTS);
 	for (size_t i = 0; i < points.size(); ++i)
 	{
-		
-		glPointSize(10);
 		glVertex2i(points[i].x, points[i].y);
-	
 	}
 	glEnd();
 }
 
-/*void drawCircle(int x, int y, int nb_circle_points, int radius)
-{
-	glColor3ub(0, 0, 255);
-	glBegin(GL_LINE_LOOP);
-	float angle;
-
-	for (size_t i = 0; i < nb_circle_points; ++i)
-	{
-		angle = 0.5 * M_PI *i / nb_circle_points;
-		glVertex2f(x + cos(angle)*radius, y + sin(angle)*radius);
-	}
-	glEnd();
-}*/
-
 void drawCircle(int x, int y, int nb_circle_points, int radius, float angleStart /*= 0.0f*/, float angleEnd  /*= 360.0f*/)
 {
-	glColor3ub(0, 0, 255);
+
 	glBegin(GL_LINE_LOOP);
-	if (angleStart != 0.0f || angleEnd != 360.0f)
-		glVertex2f(x, y);
 
 	float angle;
 	float angleOffset = angleEnd - angleStart;

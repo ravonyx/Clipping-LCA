@@ -76,7 +76,6 @@ void menu(int item)
 		case MENU_DRAW_WINDOW:
 		{
 			g_display_manager.begin_window = true;
-			g_display_manager.finish_poly = false;
 			break;
 		}
 
@@ -314,35 +313,79 @@ void display(void)
 		glColor3ub(redW, greenW, blueW);
 		drawPoints(points_window);
 	}
+	
+	if (g_display_manager.finish_circle)
+	{
+		glColor3ub(0, 0, 255);
+		drawCircle(center.x, center.y, 500, radius);
+	}
 		
+
 	if (g_display_manager.finish_window)
 	{
-		DrawPoly(points_poly, redP, greenP, blueP);
-
-		moveX = firstMouseX - lastMouseX;
-		moveY = firstMouseY - lastMouseY;
-
-		if (moveX != lastMoveX || moveY != lastMoveX)
+		if (g_display_manager.finish_poly)
 		{
-			if (moveX != lastMoveX)
-			{
-				for (size_t i = 0; i < points_window.size(); ++i)
-					points_window[i].x -= moveX - lastMoveX;
-				lastMoveX = moveX;
-			}
-			if (moveY != lastMoveY)
-			{
-				for (size_t i = 0; i < points_window.size(); ++i)
-					points_window[i].y -= moveY - lastMoveY;
-				lastMoveY = moveY;
+			DrawPoly(points_poly, redP, greenP, blueP);
 
+			moveX = firstMouseX - lastMouseX;
+			moveY = firstMouseY - lastMouseY;
+
+			if (moveX != lastMoveX || moveY != lastMoveX)
+			{
+				if (moveX != lastMoveX)
+				{
+					for (size_t i = 0; i < points_window.size(); ++i)
+						points_window[i].x -= moveX - lastMoveX;
+					lastMoveX = moveX;
+				}
+				if (moveY != lastMoveY)
+				{
+					for (size_t i = 0; i < points_window.size(); ++i)
+						points_window[i].y -= moveY - lastMoveY;
+					lastMoveY = moveY;
+
+				}
+				std::cout << "Fenetrage" << std::endl;
+				Fenetrage(points_solution, points_window, points_poly, g_display_manager.finish_fenetrage);
 			}
-			std::cout << "Fenetrage" << std::endl;
-		    Fenetrage(points_solution, points_window, points_poly, g_display_manager.finish_fenetrage);
+			DrawWindow(points_window, redW, greenW, blueW);
+			DrawSolution(points_solution);
 		}
+		if (g_display_manager.finish_circle)
+		{
+			moveX = firstMouseX - lastMouseX;
+			moveY = firstMouseY - lastMouseY;
 
-		DrawWindow(points_window, redW, greenW, blueW);
-		DrawSolution(points_solution);
+			std::vector<Point> intersectPoints;
+			float angle1 = 0, angle2 = 0;
+
+			if (moveX != lastMoveX || moveY != lastMoveX)
+			{
+				if (moveX != lastMoveX)
+				{
+					for (size_t i = 0; i < points_window.size(); ++i)
+						points_window[i].x -= moveX - lastMoveX;
+					lastMoveX = moveX;
+				}
+				if (moveY != lastMoveY)
+				{
+					for (size_t i = 0; i < points_window.size(); ++i)
+						points_window[i].y -= moveY - lastMoveY;
+					lastMoveY = moveY;
+
+				}
+			
+				circle_windowing(center, radius, points_window, intersectPoints, angle1, angle2);
+			}
+			glColor3ub(255, 0, 0);
+			drawPoints(intersectPoints, 5);
+			glColor3ub(255, 255, 0);
+			drawCircle(center.x, center.y, 500, radius, angle2, angle1);
+
+			DrawWindow(points_window, redW, greenW, blueW);
+		}
+	
+		
 	}
 	if (g_display_manager.begin_circle)
 	{
@@ -353,21 +396,20 @@ void display(void)
 			lastMoveXCircle = moveXCircle;
 			moveRadius += abs(moveXCircle);
 		}
+		glColor3ub(0, 0, 255);
 		if(moveRadius > 0)
-			drawCircle(center.x, center.y, 100, moveRadius);
+			drawCircle(center.x, center.y, 500, moveRadius);
 	}
 
 	if (fill_polygon)
 	{
-		printf("Remplissage\n");
 		glColor3ub(redP, greenP, blueP);
-		drawPoints(DrawInsidePixel(points_solution, width, height, zoomFactor));
-		fill_polygon = false;
+		std::vector <Point> inside_points;
+		DrawInsidePixel(inside_points, points_solution, width, height, zoomFactor);
+		drawPoints(inside_points);
 	}
 
-	if (g_display_manager.finish_circle)
-		drawCircle(center.x, center.y, 100, radius);
-		
+
 	glutSwapBuffers();
 
 }
