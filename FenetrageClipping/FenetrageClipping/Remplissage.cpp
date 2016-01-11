@@ -1,16 +1,49 @@
 #include "Remplissage.h"
 std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint, int width, int height, float zoomFactor)
 {
-
-
+	std::vector<Point> InsidePoints;
+	if (PolygonPoint.size() < 3)
+		return InsidePoints;
 
 	//bool isInside(test, &PolygonPoint);
 	//bool inside = PointInTriangle(test, PolygonPoint[0], PolygonPoint[1], PolygonPoint[2]);
 
-	std::vector<Point> InsidePoints;
+	
+
+	std::vector<Triangle> PolygonTriangle;
+
+	PolygonTriangle = getTriangleInPoly(PolygonPoint);
+
+
+	float x = 0;
+	float y = 0;
+
+	std::vector<Point> rect = getSurroundRect(PolygonPoint);
+	int m_height = rect[1].y - rect[0].y;
+	int m_width = rect[1].x - rect[0].x;
+
+	for (int a = rect[0].y; a < rect[1].y; a++)
+	{
+		for (int b = rect[0].x; b < rect[1].x; b++)
+		{
+			for (int k = 0; k < PolygonTriangle.size(); k++)
+				if (PointInTriangle(Point(b, a), PolygonTriangle[k].A, PolygonTriangle[k].B, PolygonTriangle[k].C))
+				{
+					InsidePoints.push_back(Point(b, a));
+
+					//Point(x, y).print();
+
+				}
+		}
+	}
+	return InsidePoints;
+}
+
+std::vector<Triangle> getTriangleInPoly(std::vector<Point>& PolygonPoint)
+{
 	std::vector<Triangle> PolygonTriangle;
 	if (PolygonPoint.size() < 3)
-		return InsidePoints;
+		return PolygonTriangle;
 
 	Point triangleOrigin;
 	triangleOrigin = PolygonPoint[0];
@@ -18,7 +51,7 @@ std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint, int width, 
 	Point secondPoint = PolygonPoint[1];
 
 	Point lastTop = PolygonPoint[2];
-	PolygonTriangle.push_back(Triangle(triangleOrigin, secondPoint ,lastTop));
+	PolygonTriangle.push_back(Triangle(triangleOrigin, secondPoint, lastTop));
 	int step = 0;
 	for (int j = 3; j < PolygonPoint.size(); j++)
 	{
@@ -27,35 +60,32 @@ std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint, int width, 
 
 	}
 
+	return PolygonTriangle;
+}
 
-	float x = 0;
-	float y = 0;
-	for (int i = 0; i < width * height; i++)
+std::vector<Point> getSurroundRect(std::vector<Point>& PolygonPoint)
+{
+	
+	Point upLeft = PolygonPoint[0];
+	Point downRight = PolygonPoint[0];
+	std::vector<Point> corners;
+	//Point top
+	for (int i = 0; i < PolygonPoint.size(); i++)
 	{
-		if (i % width == 0 && i > width)
-			y++;
+		if (PolygonPoint[i].x > downRight.x)
+			downRight.x = PolygonPoint[i].x;
+		if (PolygonPoint[i].y > downRight.y)
+			downRight.y = PolygonPoint[i].y;
+		if (PolygonPoint[i].x < upLeft.x )
+			upLeft.x = PolygonPoint[i].x;
+		if (PolygonPoint[i].y < upLeft.y)
+			upLeft.y = PolygonPoint[i].y;
 
-		x = i % width;
-
-		y = height - y;
-		x = x - (width / 2);
-		y = y - (height / 2);
-
-		//x = x / zoomFactor;
-		//y = y / zoomFactor;
-
-		for (int k = 0; k < PolygonTriangle.size(); k++)
-			if (PointInTriangle(Point(x, y), PolygonTriangle[k].A , PolygonTriangle[k].B, PolygonTriangle[k].C))
-			{
-				InsidePoints.push_back(Point(x, y));
-				//Point(x, y).print();
-
-			}
 	}
-	//bool inside = PointInTriangle(test, Point(0,0), Point(200,0), Point(0,200));
-	//if (inside)
-	//	printf("Inside\n");
-	return InsidePoints;
+	corners.push_back(upLeft);
+	corners.push_back(downRight);
+
+	return corners;
 }
 
 bool PointInTriangle(Point pt, Point v1, Point v2, Point v3)
