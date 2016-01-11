@@ -129,58 +129,66 @@ void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point >
 	finish_fenetrage = true;
 }
 
-void circle_windowing(const Point& circleCenter, float circleRadius, std::vector<Point>& points_window, std::vector<Point>& intersectPoints, float &angleDegr1, float &angleDegr2)
+void circle_windowing(const Point& circleCenter, float circleRadius, std::vector<Point>& points_window, std::vector<Point>& points_solutions, float &angleDegr1, float &angleDegr2)
 {
 
 	std::cout << "Circle" << std::endl;
 	int count = 0;
 
-	std::vector<Point> points_solutions;
-	for (int i = 0; i < points_window.size() - 1; i++)
+	std::vector<Point> intersectPoints;
+	std::vector<Point> points_window_copy = points_window;
+	points_window_copy.push_back(points_window_copy[0]);
+
+	int found = 0;
+	for (int i = 0; i < points_window_copy.size() - 1; i++)
 	{
-		count = circle_intersection(circleCenter, circleRadius, points_window[i], points_window[i + 1], intersectPoints);
+		count = circle_intersection(circleCenter, circleRadius, points_window_copy[i], points_window_copy[i + 1], intersectPoints);
+
+		found += count;
+
 		if (count == 2)
 		{
-			points_solutions = intersectPoints;
-
-			Point firstPoint = Point(cos(0)*circleRadius, sin(0)*circleRadius);
-			float length;
-
-
-			glm::vec2 center_first_point = glm::vec2(firstPoint.x - circleCenter.x, firstPoint.y - circleCenter.y);
-			length = sqrtf(center_first_point.x * center_first_point.x + center_first_point.y * center_first_point.y);
-			center_first_point /= length;
-
-			glm::vec2 center_inter_point1 = glm::vec2(points_solutions[0].x - circleCenter.x, points_solutions[0].y - circleCenter.y);
-			length = sqrtf(center_inter_point1.x * center_inter_point1.x + center_inter_point1.y * center_inter_point1.y);
-			center_inter_point1 /= length;
-
-
-			glm::vec2 center_inter_point2 = glm::vec2(points_solutions[1].x - circleCenter.x, points_solutions[1].y - circleCenter.y);
-			length = sqrtf(center_inter_point2.x * center_inter_point2.x + center_inter_point2.y * center_inter_point2.y);
-			center_inter_point2 /= length;
-
-			float angle1, angle2;
-		/*	angle1 = acos(glm::dot(center_first_point, center_inter_point1));
-		
-			
-
-			angle2 = acos(glm::dot(center_first_point, center_inter_point2));
-			
-			*/
-			angle1 = atan2f(intersectPoints[0].y - circleCenter.y, intersectPoints[0].x - circleCenter.x);
-			angle2 = atan2f(intersectPoints[1].y - circleCenter.y, intersectPoints[1].x - circleCenter.x);
-			angleDegr1 = (180 * angle1) / M_PI;
-			angleDegr2 = (180 * angle2) / M_PI;
-
-			if (angleDegr1 < 0)
-				angleDegr1 += 360.0f;
-			if (angleDegr2 < 0)
-				angleDegr2 += 360.0f;
-			std::cout << angleDegr1 << std::endl;
-			std::cout << angleDegr2 << std::endl;
-
+			points_solutions.push_back(intersectPoints[0]);
+			points_solutions.push_back(intersectPoints[1]);
 		}
+			
+		else if (count == 1)
+		{
+			points_solutions.push_back(intersectPoints[0]);
+		}
+	}
+
+	if (found == 2)
+	{
+		Point firstPoint = Point(cos(0)*circleRadius, sin(0)*circleRadius);
+		float length;
+
+		glm::vec2 center_first_point = glm::vec2(firstPoint.x - circleCenter.x, firstPoint.y - circleCenter.y);
+		length = sqrtf(center_first_point.x * center_first_point.x + center_first_point.y * center_first_point.y);
+		center_first_point /= length;
+
+		glm::vec2 center_inter_point1 = glm::vec2(points_solutions[0].x - circleCenter.x, points_solutions[0].y - circleCenter.y);
+		length = sqrtf(center_inter_point1.x * center_inter_point1.x + center_inter_point1.y * center_inter_point1.y);
+		center_inter_point1 /= length;
+
+		glm::vec2 center_inter_point2 = glm::vec2(points_solutions[1].x - circleCenter.x, points_solutions[1].y - circleCenter.y);
+		length = sqrtf(center_inter_point2.x * center_inter_point2.x + center_inter_point2.y * center_inter_point2.y);
+		center_inter_point2 /= length;
+
+		float angle1, angle2;
+
+		angle1 = atan2f(points_solutions[0].y - circleCenter.y, points_solutions[0].x - circleCenter.x);
+		angle2 = atan2f(points_solutions[1].y - circleCenter.y, points_solutions[1].x - circleCenter.x);
+		angleDegr1 = (180 * angle1) / M_PI;
+		angleDegr2 = (180 * angle2) / M_PI;
+
+		if (angleDegr1 < 0)
+			angleDegr1 += 360.0f;
+		if (angleDegr2 < 0)
+			angleDegr2 += 360.0f;
+		std::cout << angleDegr1 << std::endl;
+		std::cout << angleDegr2 << std::endl;
+
 	}
 
 }
@@ -199,30 +207,80 @@ int circle_intersection(const Point& circleCenter, float cirlceRadius, const Poi
 
 	const float det = B * B - 4.0f * A * C;
 
+	Point test_intersect_point;
+	Point test_intersect_point2;
+
 	if ((A <= 0.0000001f) || (det < 0.0f))
 	{
 		// No real solutions.
 		return 0;
 	}
+
 	else if (det == 0.0f)
 	{
 		// One solution.
 		const float t = -B / (2.0f * A);
-		intersecPoints.resize(1);
-		intersecPoints[0].x = lineStart.x + t * dx;
-		intersecPoints[0].y = lineStart.y + t * dy;
-		return 1;
+		
+		
+		test_intersect_point.x = lineStart.x + t * dx;
+		test_intersect_point.y = lineStart.y + t * dy;
+
+		if (is_between(lineStart, test_intersect_point, lineEnd))
+		{
+			intersecPoints.resize(1);
+			intersecPoints[0] = test_intersect_point;
+			
+			return 1;
+		}
 	}
 	else
 	{
-		intersecPoints.resize(2);
-		// Two solutions.
 		const float t1 = (float)((-B + sqrt(det)) / (2.0f * A));
-		intersecPoints[0].x = lineStart.x + t1 * dx;
-		intersecPoints[0].y = lineStart.y + t1 * dy;
+		test_intersect_point.x = lineStart.x + t1 * dx;
+		test_intersect_point.y = lineStart.y + t1 * dy;
+
 		const float t2 = (-B - sqrt(det)) / (2.0f * A);
-		intersecPoints[1].x = lineStart.x + t2 * dx;
-		intersecPoints[1].y = lineStart.y + t2 * dy;
-		return 2;
+		test_intersect_point2.x = lineStart.x + t2 * dx;
+		test_intersect_point2.y = lineStart.y + t2 * dy;
+
+		if (is_between(lineStart, test_intersect_point, lineEnd) && is_between(lineStart, test_intersect_point2, lineEnd))
+		{
+			intersecPoints.resize(2);
+
+			intersecPoints[0] = test_intersect_point;
+			intersecPoints[1] = test_intersect_point2;
+			return 2;
+		}
+		else if (is_between(lineStart, test_intersect_point, lineEnd))
+		{
+			intersecPoints.resize(1);
+			intersecPoints[0] = test_intersect_point;
+			return 1;
+		}
+		else if (is_between(lineStart, test_intersect_point2, lineEnd))
+		{
+			intersecPoints.resize(1);
+			intersecPoints[0] = test_intersect_point2;
+			return 1;
+		}
 	}
+	return 0;
+}
+
+float square_distance(Point a, Point b)
+{
+	return sqrt(pow(a.x - b.x , 2) + pow(a.y - b.y, 2));
+}
+	
+bool is_between(Point a, Point c, Point b)
+{
+	float sqac = square_distance(a, c);
+	float sqcb = square_distance(c, b);
+	float sqab = square_distance(a, b);
+
+	float result = (square_distance(a, c) + square_distance(c, b)) - square_distance(a, b);
+	if (fabs((square_distance(a, c) + square_distance(c, b)) - square_distance(a, b)) <= 0.0001)
+		return true;
+	else
+		return false;
 }

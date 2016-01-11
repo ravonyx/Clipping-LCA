@@ -15,3 +15,5 @@ void add_intersection(Point p1, Point p2, std::vector< Point > &points_solution,
 void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point > &points_window, const std::vector< Point > &points_poly, bool &finish_fenetrage);
 int circle_intersection(const Point& circleCenter, float cirlceRadius, const Point& lineStart, const Point& lineEnd, std::vector<Point>& intersecPoints);
 void circle_windowing(const Point& circleCenter, float circleRadius, std::vector<Point>& points_window, std::vector<Point>& intersectPoints, float &angleDegr1, float &angleDegr2);
+float square_distance(Point a, Point b);
+bool is_between(Point a, Point c, Point b);

@@ -24,6 +24,9 @@ extern s_display_manager g_display_manager;
 bool fill_polygon = false;
 float zoomFactor = 1;
 
+std::vector< std::vector<Point> > all_points_poly;
+std::vector< std::vector<Point> > all_points_solutions;
+
 std::vector< Point > points_window;
 std::vector< Point > points_poly;
 std::vector< Point > points_solution;
@@ -232,6 +235,8 @@ void keyboard(unsigned char key, int x, int y)
 		{
 			g_display_manager.begin_poly = false;
 			g_display_manager.finish_poly = true;
+			all_points_poly.push_back(points_poly);
+			points_poly.clear();
 		}
 		if (g_display_manager.begin_window)
 		{
@@ -303,8 +308,12 @@ void display(void)
 		drawPoints(points_poly);
 	}
 
-	if (g_display_manager.finish_poly)
-		DrawPoly(points_poly, redP, greenP, blueP);
+	if (all_points_poly.size() >= 1)
+	{
+		for (int i = 0; i < all_points_poly.size(); i++)
+			DrawPoly(all_points_poly[i], redP, greenP, blueP);
+	}
+		
 
 	if (g_display_manager.begin_window)
 	{
@@ -321,15 +330,15 @@ void display(void)
 
 	if (g_display_manager.finish_window)
 	{
-		if (g_display_manager.finish_poly)
+		if (all_points_poly.size() >= 1)
 		{
-			DrawPoly(points_poly, redP, greenP, blueP);
 
 			moveX = firstMouseX - lastMouseX;
 			moveY = firstMouseY - lastMouseY;
-
+			all_points_solutions.clear();
 			if (moveX != lastMoveX || moveY != lastMoveX)
 			{
+				
 				if (moveX != lastMoveX)
 				{
 					for (size_t i = 0; i < points_window.size(); ++i)
@@ -343,12 +352,23 @@ void display(void)
 					lastMoveY = moveY;
 
 				}
-				std::cout << "Fenetrage" << std::endl;
-				Fenetrage(points_solution, points_window, points_poly, g_display_manager.finish_fenetrage);
+
+				for (int i = 0; i < all_points_poly.size(); i++)
+				{
+					Fenetrage(points_solution, points_window, all_points_poly[i], g_display_manager.finish_fenetrage);
+					all_points_solutions.push_back(points_solution);
+				}
 			}
 			DrawWindow(points_window, redW, greenW, blueW);
-			DrawSolution(points_solution);
+			//DrawSolution(points_solution);
 		}
+
+		if(all_points_solutions.size() >= 1)
+		{
+			for (int i = 0; i < all_points_solutions.size(); i++)
+				DrawSolution(all_points_solutions[i]);
+		}
+
 		if (g_display_manager.finish_circle)
 		{
 			moveX = firstMouseX - lastMouseX;
