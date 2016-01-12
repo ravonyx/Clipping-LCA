@@ -13,6 +13,7 @@ std::vector<Point> getSurroundRect(std::vector<Point> &PolygonPoint);
 bool PointInTriangle(Point pt, Point v1, Point v2, Point v3);
 float sign(Point p1, Point p2, Point p3);
 
+std::vector<Point> fillCircle(Point center, int radius, std::vector< Point > &points_window);
 int isEdgeIntersect(int n, const std::vector<Point> &p);
 int isVertexInsideNewPoly(int n, const std::vector<Point> &p);
 int isVertexEar(int n, const std::vector<Point> &p);

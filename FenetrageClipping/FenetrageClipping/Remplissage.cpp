@@ -45,10 +45,10 @@ std::vector<Triangle> getTriangleInPoly(std::vector<Point>& PolygonPoint)
 	std::vector<Point> m_PolygonPoint = PolygonPoint;
 	if (PolygonPoint.size() < 3)
 		return PolygonTriangle;
-	
+
 
 	/*PolygonTriangle.push_back(Triangle(m_PolygonPoint[0], m_PolygonPoint[1], m_PolygonPoint[2]));
-	
+
 	for (int j = 3; j < m_PolygonPoint.size() - 1; j++)
 	{
 		if (isVertexEar(j, m_PolygonPoint))
@@ -124,12 +124,74 @@ float sign(Point p1, Point p2, Point p3)
 	return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 
+std::vector<Point> fillCircle(Point center, int radius,std::vector< Point > &points_window)
+{
+	int width = radius;
+	int height = radius;
+	Point leftUpPoint;
+	Point rightDownPoint;
+	std::vector<Point> insidePoints;
+
+	leftUpPoint.x = center.x - radius;
+	leftUpPoint.y = center.y + radius;
+
+	rightDownPoint.x = center.x + radius;
+	rightDownPoint.y = center.y - radius;
+
+	//printf("out");
+	std::vector<Triangle> PolygonTriangle;
+
+	PolygonTriangle = getTriangleInPoly(points_window);
+
+
+	float x = 0;
+	float y = 0;
+
+	if (points_window.size() < 1)
+		return insidePoints;
+	std::vector<Point> rect = getSurroundRect(points_window);
+	std::vector<Point> pointToUse;
+	int m_height = rect[1].y - rect[0].y;
+	int m_width = rect[1].x - rect[0].x;
+
+	for (int a = rect[0].y; a < rect[1].y; a++)
+	{
+		for (int b = rect[0].x; b < rect[1].x; b++)
+		{
+			for (int k = 0; k < PolygonTriangle.size(); k++)
+				if (PointInTriangle(Point(b, a), PolygonTriangle[k].A, PolygonTriangle[k].B, PolygonTriangle[k].C))
+				{
+					pointToUse.push_back(Point(b, a));
+
+					//Point(x, y).print();
+
+				}
+		}
+	}
+	for (size_t i = 0; i < pointToUse.size(); i++)
+	{
+		if (pow((pointToUse[i].x - center.x), 2) + pow((pointToUse[i].y - center.y), 2) < pow(radius, 2))
+				insidePoints.push_back(pointToUse[i]);
+	}
+	/*
+	for (int i = leftUpPoint.x; i < rightDownPoint.x; i++)
+	{
+		for (int j = rightDownPoint.y; j < leftUpPoint.y; j++)
+		{
+			if (pow((i - center.x), 2) + pow((j - center.y), 2) < pow(radius, 2))
+				if (is_inside(Point(i, j), points_window))
+					insidePoints.push_back(Point(i, j));
+		}
+	}*/
+	return insidePoints;
+}
+
 int isEdgeIntersect(int n, const std::vector<Point> &p)
 {
 	Point v = p[n];
 	std::vector<Point> a;
 
-	for (size_t i = 0; i < p.size(); i++)
+	for (int i = 0; i < p.size(); i++)
 		if (i != n)
 			a.push_back(p[i]);
 
@@ -137,7 +199,7 @@ int isEdgeIntersect(int n, const std::vector<Point> &p)
 
 	Point v1 = a[prev], v2 = a[next];
 
-	for (size_t i = 0, j = cnt - 1; i < cnt; j = i++)
+	for (int i = 0, j = cnt - 1; i < cnt; j = i++)
 	{
 		if (prev == i || prev == j || next == i || next == j)
 			continue;
@@ -168,13 +230,13 @@ int isVertexInsideNewPoly(int n, const std::vector<Point> &p)
 	Point v = p[n];
 	std::vector<Point> a;
 
-	for (size_t i = 0; i < p.size(); i++)
+	for (int i = 0; i < p.size(); i++)
 		if (i != n)
 			a.push_back(p[i]);
 
 	int c = 1;
 
-	for (size_t i = 0, j = a.size() - 1; i < a.size(); j = i++)
+	for (int i = 0, j = a.size() - 1; i < a.size(); j = i++)
 	{
 		if ((((a[i].y <= v.y) && (v.y < a[j].y)) || ((a[j].y <= v.y) && (v.y < a[i].y))) && (v.x >(a[j].x - a[i].x) * (v.y - a[i].y) / (a[j].y - a[i].y) + a[i].x))
 			c = !c;

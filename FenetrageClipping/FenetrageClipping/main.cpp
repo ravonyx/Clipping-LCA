@@ -453,6 +453,9 @@ void display(void)
 			std::vector <Point> inside_points = DrawInsidePixel(all_points_solutions[i], width, height, zoom_factor);
 			draw_points(inside_points);
 		}
+		std::vector <Point> inside_points = fillCircle(center, radius,all_points_window[0]);
+		
+		draw_points(inside_points);
 	}
 
 	glutSwapBuffers();
