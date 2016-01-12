@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DrawElements.cpp" />
-    <ClCompile Include="Fenetrage.cpp" />
+    <ClCompile Include="Windowing.cpp" />
     <ClCompile Include="Interfaces.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Point.cpp" />
@@ -29,7 +29,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DrawElements.h" />
-    <ClInclude Include="Fenetrage.h" />
+    <ClInclude Include="Windowing.h" />
     <ClInclude Include="Interfaces.h" />
     <ClInclude Include="Point.h" />
     <ClInclude Include="Remplissage.h" />

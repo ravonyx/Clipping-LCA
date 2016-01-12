@@ -2,8 +2,6 @@
 struct s_display_manager {
 	bool begin_window = false;
 	bool begin_poly = false;
-	bool finish_window = false;
-	bool finish_poly = false;
 	bool finish_fenetrage = false;
 	bool move_window = false;
 	bool click_window = false;

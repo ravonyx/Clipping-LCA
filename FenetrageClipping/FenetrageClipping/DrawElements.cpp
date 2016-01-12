@@ -1,13 +1,13 @@
 #include "DrawElements.h"
 
-void drawLines(const std::vector<Point> &points)
+void draw_lines(const std::vector<Point> &points)
 {
 	glBegin(GL_LINE_LOOP);
 	for (size_t i = 0; i < points.size(); ++i)
 		glVertex3f(points[i].x, points[i].y, 0);
 	glEnd();
 }
-void drawPoints(const std::vector< Point > &points, float size)
+void draw_points(const std::vector< Point > &points, float size)
 {
 	glPointSize(size);
 	glBegin(GL_POINTS);
@@ -18,9 +18,8 @@ void drawPoints(const std::vector< Point > &points, float size)
 	glEnd();
 }
 
-void drawCircle(int x, int y, int nb_circle_points, int radius, float angleStart /*= 0.0f*/, float angleEnd  /*= 360.0f*/)
+void draw_circle(int x, int y, int nb_circle_points, int radius, float angleStart /*= 0.0f*/, float angleEnd  /*= 360.0f*/)
 {
-
 	glBegin(GL_LINE_LOOP);
 
 	float angle;
@@ -35,21 +34,21 @@ void drawCircle(int x, int y, int nb_circle_points, int radius, float angleStart
 	glEnd();
 }
 
-void DrawPoly(const std::vector< Point > points_poly, int red, int green, int blue)
+void draw_poly(const std::vector< Point > points_poly, int red, int green, int blue)
 {
 	glColor3ub(red, green, blue);
-	drawPoints(points_poly);
-	drawLines(points_poly);
+	draw_points(points_poly);
+	draw_lines(points_poly);
 }
-void DrawWindow(const std::vector< Point > points_window, int red, int green, int blue)
+void draw_window(const std::vector< Point > points_window, int red, int green, int blue)
 {
 	glColor3ub(red, green, blue);
-	drawPoints(points_window);
-	drawLines(points_window);
+	draw_points(points_window);
+	draw_lines(points_window);
 }
-void DrawSolution(const std::vector< Point > points_solution)
+void draw_solution(const std::vector< Point > points_solution)
 {
 	glColor3ub(255, 255, 255);
-	drawPoints(points_solution);
-	drawLines(points_solution);
+	draw_points(points_solution);
+	draw_lines(points_solution);
 }

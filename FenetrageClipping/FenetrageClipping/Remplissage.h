@@ -4,7 +4,7 @@
 #include <glm\glm.hpp>
 #include <vector>
 #include <algorithm>
-#include "Fenetrage.h"
+#include "Windowing.h"
 #include "triangle.h"
 
 std::vector<Point> DrawInsidePixel(std::vector<Point> &PolygonPoint,int width,int height,float zoomFactor);
