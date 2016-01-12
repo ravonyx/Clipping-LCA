@@ -447,8 +447,12 @@ void display(void)
 	if (fill_polygon)
 	{
 		glColor3ub(redP, greenP, blueP);
-		std::vector <Point> inside_points = DrawInsidePixel(points_solution, width, height, zoom_factor);
-		draw_points(inside_points);
+
+		for (size_t i = 0; i < all_points_solutions.size(); i++)
+		{
+			std::vector <Point> inside_points = DrawInsidePixel(all_points_solutions[i], width, height, zoom_factor);
+			draw_points(inside_points);
+		}
 	}
 
 	glutSwapBuffers();
