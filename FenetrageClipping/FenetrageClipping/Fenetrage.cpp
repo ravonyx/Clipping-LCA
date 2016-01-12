@@ -72,8 +72,6 @@ void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point >
 	std::vector<Point> points_poly_copy = points_poly;
 	int nb_points_solutions;
 
-	std::cout << "Nb points poly " << nb_points_poly << std::endl;
-	std::cout << "Nb points window " << nb_points_window << std::endl;
 	nb_points_solutions = 0;
 
 	Point prev_point_poly;
@@ -96,11 +94,9 @@ void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point >
 			else
 			{
 				glm::vec2 res1;
-				//std::cout << "Test " << "Point win " << j << "," << j + 1 << " with " << i - 1 << "," << i << std::endl;
 				if (cut(prev_point_poly, current_point_poly, p3, p4, res1))
 				{
 					add_intersection(prev_point_poly, current_point_poly, points_solution, res1.x);
-					std::cout << "Point win " << j << "," << j + 1 << " cut with Point poly " << i - 1 << "," << i << std::endl;
 					nb_points_solutions++;
 				}
 			}
@@ -118,7 +114,6 @@ void Fenetrage(std::vector< Point > &points_solution, const std::vector< Point >
 			if (cut(prev_point_poly, f, p3, p4, res2))
 			{
 				add_intersection(prev_point_poly, f, points_solution, res2.x);
-				std::cout << "Points soluce > 0 Point win " << j << "," << j + 1 << " cut with Point poly " << last_index_poly << "," << 0 << std::endl;
 				nb_points_solutions++;
 			}
 		}
@@ -274,10 +269,6 @@ float square_distance(Point a, Point b)
 	
 bool is_between(Point a, Point c, Point b)
 {
-	float sqac = square_distance(a, c);
-	float sqcb = square_distance(c, b);
-	float sqab = square_distance(a, b);
-
 	float result = (square_distance(a, c) + square_distance(c, b)) - square_distance(a, b);
 	if (fabs((square_distance(a, c) + square_distance(c, b)) - square_distance(a, b)) <= 0.0001)
 		return true;

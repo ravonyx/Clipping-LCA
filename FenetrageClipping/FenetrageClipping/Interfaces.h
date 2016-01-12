@@ -6,6 +6,7 @@ struct s_display_manager {
 	bool finish_poly = false;
 	bool finish_fenetrage = false;
 	bool move_window = false;
+	bool click_window = false;
 	bool finish_circle = false;
 	bool begin_circle = false;
 };
