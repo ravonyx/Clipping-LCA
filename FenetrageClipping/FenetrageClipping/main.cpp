@@ -83,23 +83,26 @@ void menu(int item)
 			g_display_manager.begin_window = true;
 			break;
 		}
-
-		case MENU_MOVE:
+		case MENU_REMPLISSAGE:
 		{
-			g_display_manager.click_window = true;
+			fill_polygon = true;
 			break;
 		}
 		case MENU_DRAW_CIRCLE:
 		{
 			g_display_manager.begin_circle = true;
 		}
-
-		case MENU_REMPLISSAGE:
+		case MENU_MOVE:
 		{
-			fill_polygon = true;
+			g_display_manager.click_window = true;
 			break;
 		}
-
+		case MENU_QUIT_MOVE:
+		{
+			g_display_manager.click_window = false;
+			g_display_manager.move_window = false;
+			break;
+		}
 		default:
 		{
 			break;
@@ -118,9 +121,9 @@ void processColorWindowMenu(int option)
 			greenW = 153;
 			blueW = 0; break;
 		case COLOR_BLUE:
-			redW = 0;
-			greenW = 0;
-			blueW = 204; break;
+			redW = 102;
+			greenW = 255;
+			blueW = 255; break;
 		case COLOR_VIOLET:
 			redW = 153;
 			greenW = 0;
@@ -223,8 +226,12 @@ void mouse(int button, int state, int x, int y)
 				{
 					g_display_manager.move_window = true;
 					index_move_win = i; 
+
 					first_mousex = x;
 					first_mousey = y;
+					last_mousex = x;
+					last_mousey = y;
+
 					last_movex = 0;
 					last_movey = 0;
 				}
@@ -299,9 +306,10 @@ int main(int argc, char** argv)
 	glutAddSubMenu("Colors for Window", colorWindowMenu);
 	glutAddMenuEntry("Draw polygon", MENU_DRAW_POLYGON);
 	glutAddMenuEntry("Draw window", MENU_DRAW_WINDOW);
-	glutAddMenuEntry("Move window", MENU_MOVE);
 	glutAddMenuEntry("Remplissage", MENU_REMPLISSAGE);
 	glutAddMenuEntry("Draw circle", MENU_DRAW_CIRCLE);
+	glutAddMenuEntry("Move window", MENU_MOVE);
+	glutAddMenuEntry("Quit Move window", MENU_QUIT_MOVE);
 	glutAttachMenu(GLUT_RIGHT_BUTTON);
 
 	glutMainLoop();
@@ -344,7 +352,7 @@ void display(void)
 	{
 		moveX = first_mousex - last_mousex;
 		moveY = first_mousey - last_mousey;
-		if ((moveX != last_movex || moveY != last_movex) && g_display_manager.move_window)
+		if ((moveX != last_movex || moveY != last_movey))
 		{
 			//move the window
 			if (moveX != last_movex)
@@ -395,7 +403,7 @@ void display(void)
 		}	
 		glColor3ub(255, 0, 0);
 		draw_points(intersectPoints, 5);
-		glColor3ub(0, 0, 255);
+		glColor3ub(0, 0, 204);
 		draw_circle(center.x, center.y, 500, radius);
 	}
 	
@@ -430,7 +438,7 @@ void display(void)
 			last_move_circlex = move_circlex;
 			move_radius += abs(move_circlex);
 		}
-		glColor3ub(0, 0, 255);
+		glColor3ub(0, 0, 204);
 		if(move_radius > 0)
 			draw_circle(center.x, center.y, 500, move_radius);
 	}
