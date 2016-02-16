@@ -1,0 +1,27 @@
+Fenetrage
+
+Click droit puis sur draw polygon/draw window pour cliquer les points. (Attention : les points de la fenetre doivent etre cliqués dans le sens horaire)
+Valider la construction par espace une fois que tout les points ont été cliqués.
+Le fenetrage se fait automatiquement.
+
+Bouger la fenetre
+
+Click droit puis sur move window et enfin cliquer sur une fenetre pour la deplacer. (Quit move window pour quitter le mode de deplacement)
+
+Remplissage
+
+Click droit puis remplissage pour voir le remplissage en temps réel.
+
+Couleurs
+
+On peut changer les couleurs du poly et de la window avec les options Colors for poly/Colors for window. 
+Les couleurs de base sont rouges pour les polygones et vert pour les fenetres
+
+Zoom 
+
+Le zoom s'effectue avec le scroll de la souris.
+
+Cercle 
+
+Click droit et draw circle pour dessiner un cercle, il faut cliquer sur l'endroit ou on souhaite placer le centre puis drag la souris pour ajuster le rayon du cercle.
+
